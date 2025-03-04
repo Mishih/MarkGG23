@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <TextView
+            android:id="@+id/tv_station_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/station_number"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_station_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="1"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/tv_station_label"
+            app:layout_constraintTop_toTopOf="@id/tv_station_label" />
+
+        <ImageButton
+            android:id="@+id/btn_remove_measurement"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/remove_measurement"
+            android:src="@drawable/ic_delete"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Информация о точках визирования -->
+        <TextView
+            android:id="@+id/tv_points_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Точки визирования:"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_station_label" />
+
+        <TextView
+            android:id="@+id/tv_point_numbers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="1 → 2"
+            app:layout_constraintStart_toEndOf="@id/tv_points_label"
+            app:layout_constraintTop_toTopOf="@id/tv_points_label" />
+
+        <!-- Расстояние до первой точки визирования -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_distance_point1"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="4dp"
+            android:hint="Расстояние до точки 1 (м)"
+            app:layout_constraintEnd_toStartOf="@+id/til_distance_point2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_points_label">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_distance_point1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Расстояние до второй точки визирования -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_distance_point2"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:hint="Расстояние до точки 2 (м)"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/til_distance_point1"
+            app:layout_constraintTop_toTopOf="@id/til_distance_point1">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_distance_point2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Заголовок для отсчетов на первую точку -->
+        <TextView
+            android:id="@+id/tv_point1_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Отсчеты на точку 1"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/til_distance_point1" />
+
+        <!-- Отсчеты КЛ и КП для первой точки -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_left_circle_point1"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="4dp"
+            android:hint="@string/left_circle"
+            app:layout_constraintEnd_toStartOf="@+id/til_right_circle_point1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_point1_label">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_left_circle_point1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_right_circle_point1"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:hint="@string/right_circle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/til_left_circle_point1"
+            app:layout_constraintTop_toTopOf="@id/til_left_circle_point1">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_right_circle_point1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Заголовок для отсчетов на вторую точку -->
+        <TextView
+            android:id="@+id/tv_point2_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Отсчеты на точку 2"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/til_left_circle_point1" />
+
+        <!-- Отсчеты КЛ и КП для второй точки -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_left_circle_point2"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="4dp"
+            android:hint="@string/left_circle"
+            app:layout_constraintEnd_toStartOf="@+id/til_right_circle_point2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_point2_label">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_left_circle_point2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_right_circle_point2"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:hint="@string/right_circle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/til_left_circle_point2"
+            app:layout_constraintTop_toTopOf="@id/til_left_circle_point2">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_right_circle_point2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Результаты вычислений -->
+        <TextView
+            android:id="@+id/tv_results_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Результаты вычислений"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/til_left_circle_point2" />
+
+        <!-- Разница КЛ -->
+        <TextView
+            android:id="@+id/tv_left_difference_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Разница КЛ:"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_results_label" />
+
+        <TextView
+            android:id="@+id/tv_left_difference"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="-"
+            app:layout_constraintStart_toEndOf="@id/tv_left_difference_label"
+            app:layout_constraintTop_toTopOf="@id/tv_left_difference_label" />
+
+        <!-- Разница КП -->
+        <TextView
+            android:id="@+id/tv_right_difference_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="Разница КП:"
+            app:layout_constraintStart_toEndOf="@id/tv_left_difference"
+            app:layout_constraintTop_toTopOf="@id/tv_left_difference_label" />
+
+        <TextView
+            android:id="@+id/tv_right_difference"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="-"
+            app:layout_constraintStart_toEndOf="@id/tv_right_difference_label"
+            app:layout_constraintTop_toTopOf="@id/tv_right_difference_label" />
+
+        <!-- Средний угол -->
+        <TextView
+            android:id="@+id/tv_average_angle_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/average_angle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_left_difference_label" />
+
+        <TextView
+            android:id="@+id/tv_average_angle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="-"
+            app:layout_constraintStart_toEndOf="@id/tv_average_angle_label"
+            app:layout_constraintTop_toTopOf="@id/tv_average_angle_label" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

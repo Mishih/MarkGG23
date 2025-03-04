@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Маркшейдерия ГГ-23</string>в
+
+    <!-- Общие строки -->
+    <string name="new_project">Новый проект</string>
+    <string name="save">Сохранить</string>
+    <string name="cancel">Отмена</string>
+    <string name="delete">Удалить</string>
+    <string name="add_point">Добавить точку</string>
+    <string name="remove_point">Удалить точку</string>
+
+    <!-- Строки для исходных точек -->
+    <string name="reference_points">Исходные пункты</string>
+    <string name="min_points_required">Требуется минимум 4 исходных пункта</string>
+    <string name="min_points_satisfied">Необходимое количество точек достигнуто</string>
+    <string name="x_coordinate">X (м)</string>
+    <string name="y_coordinate">Y (м)</string>
+    <string name="angle_beta">Угол β (°)</string>
+
+    <!-- Строки для вычислений -->
+    <string name="calculation_settings">Параметры вычисления</string>
+    <string name="max_allowable_error">Максимальная допустимая погрешность (см)</string>
+    <string name="point_combinations">Комбинации точек</string>
+    <string name="first_combination">Первая комбинация</string>
+    <string name="second_combination">Вторая комбинация</string>
+    <string name="calculate">Вычислить</string>
+    <string name="calculation_info">Метод Деламбра будет использовать две независимые комбинации исходных пунктов для контроля вычислений</string>
+
+    <!-- Строки для результатов -->
+    <string name="calculation_results">Результаты вычислений</string>
+    <string name="directional_angles">Дирекционные углы</string>
+    <string name="coordinates">Координаты</string>
+    <string name="parameter">Параметр</string>
+    <string name="combination_1">Комбинация I</string>
+    <string name="combination_2">Комбинация II</string>
+    <string name="discrepancy">Расхождение</string>
+    <string name="final_results">Итоговые результаты</string>
+    <string name="final_x">X:</string>
+    <string name="final_y">Y:</string>
+    <string name="save_results">Сохранить проект</string>
+    <string name="danger_circle_warning">Внимание: точка находится внутри опасной окружности!</string>
+    <string name="danger_circle_ok">Точка находится вне опасной окружности</string>
+    <string name="discrepancy_too_large">Расхождение превышает допустимое</string>
+
+    <!-- Строки для сохраненных проектов -->
+    <string name="saved_projects">Сохраненные проекты</string>
+    <string name="load_project">Загрузить</string>
+    <string name="no_saved_projects">Нет сохраненных проектов</string>
+
+    <!-- Строки для теодолитного хода -->
+    <string name="theodolite_journal">Журнал теодолитного хода</string>
+    <string name="station_number">№ станции</string>
+    <string name="point_number">№ точки</string>
+    <string name="distance">Длина стороны D, м</string>
+    <string name="left_circle">Отсчет КЛ (°\'\")</string>
+    <string name="right_circle">Отсчет КП (°\'\")</string>
+    <string name="horizontal_angle">Горизонтальный угол β:</string>
+    <string name="average_angle">Средний угол βср:</string>
+    <string name="slope_angle">Угол наклона ν (°\'\")</string>
+    <string name="horizontal_distance">Горизонтальное проложение d:</string>
+    <string name="add_station">Добавить станцию</string>
+    <string name="save_theodolite">Сохранить журнал</string>
+    <string name="edit_mode">Режим редактирования</string>
+    <string name="table_mode">Режим таблицы</string>
+    <string name="station_point_info">Укажите номер станции и номер точки, на которую производится визирование</string>
+    <string name="remove_measurement">Удалить измерение</string>
+    <string name="invalid_input">Неверный ввод</string>
+    <string name="no_measurements">Нет измерений для сохранения</string>
+    <string name="journal_name">Название журнала</string>
+    <string name="journal_saved">Журнал теодолитного хода сохранен</string>
+    <string name="save_error">Ошибка при сохранении</string>
+    <string name="enter_journal_name">Введите название журнала</string>
+    <string name="add">Добавить</string>
+    <!-- Строки для сохраненных журналов теодолитного хода -->
+    <string name="saved_theodolite_journals">Сохраненные журналы теодолитного хода</string>
+    <string name="no_saved_journals">Нет сохраненных журналов</string>
+    <string name="load_journal">Загрузить</string>
+    <string name="journal_deleted">Журнал удален</string>
+    <string name="stations_count">Станций: %d</string>
+
+    <!-- Дополнительные строки для вкладки -->
+    <string name="tab_saved_journals">Сохраненные журналы</string>
+</resources>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.javamark">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MaterialComponents.Light.NoActionBar">
+
+        <!-- Стартовый экран (IntroActivity) -->
+        <activity android:name=".IntroActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Активность для обратной геодезической засечки -->
+        <activity
+            android:name=".GeodesicActivity"
+            android:label="@string/app_name"
+            android:parentActivityName=".IntroActivity" />
+
+        <!-- Активность для теодолитного хода -->
+        <activity
+            android:name=".TheodoliteActivity"
+            android:label="@string/app_name"
+            android:parentActivityName=".IntroActivity" />
+
+    </application>
+
+</manifest>
