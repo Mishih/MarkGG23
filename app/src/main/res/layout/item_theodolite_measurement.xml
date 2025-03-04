@@ -62,40 +62,18 @@
             app:layout_constraintStart_toEndOf="@id/tv_points_label"
             app:layout_constraintTop_toTopOf="@id/tv_points_label" />
 
-        <!-- Расстояние до первой точки визирования -->
+        <!-- Расстояние -->
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/til_distance_point1"
+            android:id="@+id/til_distance"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="4dp"
-            android:hint="Расстояние до точки 1 (м)"
-            app:layout_constraintEnd_toStartOf="@+id/til_distance_point2"
-            app:layout_constraintStart_toStartOf="parent"
+            android:hint="Расстояние (м)"
             app:layout_constraintTop_toBottomOf="@id/tv_points_label">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_distance_point1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Расстояние до второй точки визирования -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/til_distance_point2"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:hint="Расстояние до точки 2 (м)"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/til_distance_point1"
-            app:layout_constraintTop_toTopOf="@id/til_distance_point1">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_distance_point2"
+                android:id="@+id/et_distance"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal" />
@@ -110,7 +88,7 @@
             android:text="Отсчеты на точку 1"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/til_distance_point1" />
+            app:layout_constraintTop_toBottomOf="@id/til_distance" />
 
         <!-- Отсчеты КЛ и КП для первой точки -->
         <com.google.android.material.textfield.TextInputLayout
@@ -199,6 +177,23 @@
                 android:inputType="text" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Угол наклона -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_slope_angle"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="Угол наклона (°′″)"
+            app:layout_constraintTop_toBottomOf="@id/til_left_circle_point2">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_slope_angle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
         <!-- Результаты вычислений -->
         <TextView
             android:id="@+id/tv_results_label"
@@ -208,7 +203,7 @@
             android:text="Результаты вычислений"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/til_left_circle_point2" />
+            app:layout_constraintTop_toBottomOf="@id/til_slope_angle" />
 
         <!-- Разница КЛ -->
         <TextView
@@ -266,6 +261,25 @@
             android:text="-"
             app:layout_constraintStart_toEndOf="@id/tv_average_angle_label"
             app:layout_constraintTop_toTopOf="@id/tv_average_angle_label" />
+
+        <!-- Горизонтальное проложение -->
+        <TextView
+            android:id="@+id/tv_horizontal_distance_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Горизонтальное проложение:"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_average_angle_label" />
+
+        <TextView
+            android:id="@+id/tv_horizontal_distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="-"
+            app:layout_constraintStart_toEndOf="@id/tv_horizontal_distance_label"
+            app:layout_constraintTop_toTopOf="@id/tv_horizontal_distance_label" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

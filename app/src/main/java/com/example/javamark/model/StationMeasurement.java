@@ -13,9 +13,10 @@ public class StationMeasurement implements Serializable {
     private int pointNumber1;          // Номер первой точки визирования
     private int pointNumber2;          // Номер второй точки визирования
 
-    // Расстояния до точек визирования
-    private double distanceToPoint1;   // Расстояние до первой точки, м
-    private double distanceToPoint2;   // Расстояние до второй точки, м
+    // Расстояние между точками и угол наклона
+    private double distance;           // Расстояние, м
+    private AngleValue slopeAngle;     // Угол наклона
+    private double horizontalDistance; // Горизонтальное проложение, м
 
     // Отсчеты для первой точки
     private AngleValue leftCirclePoint1;  // Отсчет КЛ на первую точку
@@ -38,6 +39,7 @@ public class StationMeasurement implements Serializable {
         this.angleLeftDifference = new AngleValue();
         this.angleRightDifference = new AngleValue();
         this.averageAngle = new AngleValue();
+        this.slopeAngle = new AngleValue();
     }
 
     public StationMeasurement(int stationNumber, int pointNumber1, int pointNumber2) {
@@ -47,7 +49,7 @@ public class StationMeasurement implements Serializable {
         this.pointNumber2 = pointNumber2;
     }
 
-    // Getters and Setters
+    // Getters and Setters (добавьте недостающие)
     public int getStationNumber() {
         return stationNumber;
     }
@@ -72,22 +74,34 @@ public class StationMeasurement implements Serializable {
         this.pointNumber2 = pointNumber2;
     }
 
-    public double getDistanceToPoint1() {
-        return distanceToPoint1;
+    // Добавляем методы для работы с расстоянием
+    public double getDistance() {
+        return distance;
     }
 
-    public void setDistanceToPoint1(double distanceToPoint1) {
-        this.distanceToPoint1 = distanceToPoint1;
+    public void setDistance(double distance) {
+        this.distance = distance;
     }
 
-    public double getDistanceToPoint2() {
-        return distanceToPoint2;
+    // Методы для угла наклона
+    public AngleValue getSlopeAngle() {
+        return slopeAngle;
     }
 
-    public void setDistanceToPoint2(double distanceToPoint2) {
-        this.distanceToPoint2 = distanceToPoint2;
+    public void setSlopeAngle(AngleValue slopeAngle) {
+        this.slopeAngle = slopeAngle;
     }
 
+    // Методы для горизонтального проложения
+    public double getHorizontalDistance() {
+        return horizontalDistance;
+    }
+
+    public void setHorizontalDistance(double horizontalDistance) {
+        this.horizontalDistance = horizontalDistance;
+    }
+
+    // Существующие getter и setter для других полей...
     public AngleValue getLeftCirclePoint1() {
         return leftCirclePoint1;
     }
@@ -144,7 +158,31 @@ public class StationMeasurement implements Serializable {
         this.averageAngle = averageAngle;
     }
 
-    // Вычисления углов
+    /**
+     * Вычисляет горизонтальное проложение с учетом угла наклона
+     */
+    public void calculateHorizontalDistance() {
+        try {
+            if (distance <= 0 || slopeAngle == null) {
+                horizontalDistance = 0;
+                return;
+            }
+
+            // Преобразуем угол наклона в радианы
+            double slopeAngleRadians = slopeAngle.toDecimalDegrees() * Math.PI / 180.0;
+
+            // Вычисляем горизонтальное проложение
+            horizontalDistance = distance * Math.cos(slopeAngleRadians);
+
+        } catch (Exception e) {
+            Log.e(TAG, "Ошибка при вычислении горизонтального проложения: " + e.getMessage());
+            horizontalDistance = 0;
+        }
+    }
+
+    /**
+     * Вычисляет углы (разница КЛ, разница КП, средний угол)
+     */
     public void calculateAngles() {
         try {
             // Проверяем, что все необходимые отсчеты введены и не содержат нулевые значения

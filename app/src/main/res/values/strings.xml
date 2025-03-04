@@ -81,4 +81,20 @@
 
     <!-- Дополнительные строки для вкладки -->
     <string name="tab_saved_journals">Сохраненные журналы</string>
+
+
+    <string name="gyroscopic_orientation">Гироскопическое ориентирование</string>
+    <string name="zero_torsion">Нуль торсиона</string>
+    <string name="equilibrium_position">Положение равновесия ЧЭ</string>
+    <string name="adjoining_direction">Примычное направление</string>
+    <string name="torsion_correction">Поправка за закручивание торсиона</string>
+    <string name="gyroscopic_results">Результаты</string>
+    <string name="saved_measurements">Сохранённые измерения</string>
+    <string name="calculate_azimuth">Вычислить азимут</string>
+    <string name="save_measurement">Сохранить измерение</string>
+    <string name="measurement_name">Название измерения</string>
+    <string name="load_measurement">Загрузить</string>
+    <string name="delete_measurement">Удалить</string>
+    <string name="no_saved_measurements">Нет сохранённых измерений</string>
+    <string name="new_measurement">Новое измерение</string>
 </resources>

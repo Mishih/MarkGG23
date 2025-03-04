@@ -19,6 +19,7 @@ public class IntroActivity extends AppCompatActivity {
 
         Button btnStartGeodesic = findViewById(R.id.btn_start_geodesic);
         Button btnStartTheodolite = findViewById(R.id.btn_start_theodolite);
+        Button btnStartGyroscopic = findViewById(R.id.btn_start_gyroscopic);
 
         btnStartGeodesic.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -34,6 +35,15 @@ public class IntroActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Запуск активности для теодолитного хода
                 Intent intent = new Intent(IntroActivity.this, TheodoliteActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btnStartGyroscopic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Запуск активности для гироскопического ориентирования
+                Intent intent = new Intent(IntroActivity.this, GyroscopicActivity.class);
                 startActivity(intent);
             }
         });
