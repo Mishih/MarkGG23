@@ -217,7 +217,7 @@ public class DirectionFragment extends Fragment {
         }
 
         if (measurement.getN() != null && measurement.getN().getDegrees() != 0) {
-            tvN.setText(measurement.getN().toString());
+            tvN.setText(measurement.getN().toString() + " (среднее N' и N'')");
         }
     }
 }

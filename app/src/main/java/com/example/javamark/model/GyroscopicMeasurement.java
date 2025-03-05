@@ -1,5 +1,6 @@
 package com.example.javamark.model;
 
+import android.content.Context;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -10,6 +11,9 @@ public class GyroscopicMeasurement implements Serializable {
     private int id;
     private String name;
     private Date createdAt;
+
+    // transient, чтобы не сериализовать контекст
+    private transient Context context;
 
     // Нуль торсиона (цифровые значения)
     private double n1Value, n2Value, n3Value, n4Value;
@@ -92,6 +96,15 @@ public class GyroscopicMeasurement implements Serializable {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+    // Context getter/setter
+    public Context getContext() {
+        return context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
     }
 
     // Нуль торсиона (цифровые значения)

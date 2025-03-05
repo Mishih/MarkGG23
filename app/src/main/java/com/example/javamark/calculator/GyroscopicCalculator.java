@@ -72,29 +72,40 @@ public class GyroscopicCalculator {
      */
     public void calculateDirection() {
         try {
-            // N' = КЛ градусы + среднее(КЛ минуты/секунды, КП минуты/секунды)
+            // N' - для первой пары отсчетов (КЛ1 и КП1)
             AngleValue kl1 = measurement.getKL1();
             AngleValue kp1 = measurement.getKP1();
 
             // Берем градусы из КЛ
             int nPrimeDegrees = kl1.getDegrees();
 
-            // Среднее значение минут
-            int nPrimeMinutes = (kl1.getMinutes() + kp1.getMinutes()) / 2;
+            // Для минут и секунд: преобразуем в десятичные градусы, но только минуты и секунды
+            double kl1DecimalMinSec = (kl1.getMinutes() / 60.0) + (kl1.getSeconds() / 3600.0);
+            double kp1DecimalMinSec = (kp1.getMinutes() / 60.0) + (kp1.getSeconds() / 3600.0);
 
-            // Среднее значение секунд
-            double nPrimeSeconds = (kl1.getSeconds() + kp1.getSeconds()) / 2.0;
+            // Среднее значение минут и секунд
+            double nPrimeDecimalMinSec = (kl1DecimalMinSec + kp1DecimalMinSec) / 2.0;
+
+            // Преобразуем обратно в минуты и секунды
+            int nPrimeMinutes = (int)(nPrimeDecimalMinSec * 60);
+            double nPrimeSeconds = (nPrimeDecimalMinSec * 60 - nPrimeMinutes) * 60;
 
             AngleValue nPrime = new AngleValue(nPrimeDegrees, nPrimeMinutes, nPrimeSeconds);
             measurement.setNPrime(nPrime);
 
-            // N'' = аналогично для КЛ2 и КП2
+            // N'' - аналогично для КЛ2 и КП2
             AngleValue kl2 = measurement.getKL2();
             AngleValue kp2 = measurement.getKP2();
 
             int nDoublePrimeDegrees = kl2.getDegrees();
-            int nDoublePrimeMinutes = (kl2.getMinutes() + kp2.getMinutes()) / 2;
-            double nDoublePrimeSeconds = (kl2.getSeconds() + kp2.getSeconds()) / 2.0;
+
+            double kl2DecimalMinSec = (kl2.getMinutes() / 60.0) + (kl2.getSeconds() / 3600.0);
+            double kp2DecimalMinSec = (kp2.getMinutes() / 60.0) + (kp2.getSeconds() / 3600.0);
+
+            double nDoublePrimeDecimalMinSec = (kl2DecimalMinSec + kp2DecimalMinSec) / 2.0;
+
+            int nDoublePrimeMinutes = (int)(nDoublePrimeDecimalMinSec * 60);
+            double nDoublePrimeSeconds = (nDoublePrimeDecimalMinSec * 60 - nDoublePrimeMinutes) * 60;
 
             AngleValue nDoublePrime = new AngleValue(nDoublePrimeDegrees, nDoublePrimeMinutes, nDoublePrimeSeconds);
             measurement.setNDoublePrime(nDoublePrime);
@@ -116,41 +127,156 @@ public class GyroscopicCalculator {
      */
     public void calculateTorsionCorrection() {
         try {
-            // ψt = t * (n0 - nk)
-            double n0 = measurement.getN0Value();
-            double nk = measurement.getNkValue();
-            double tDecimal = measurement.getT().toDecimalDegrees();
+            Context context = null;
+            if (measurement instanceof GyroscopicMeasurement) {
+                if (((GyroscopicMeasurement) measurement).getContext() != null) {
+                    context = ((GyroscopicMeasurement) measurement).getContext();
+                }
+            }
 
-            double psiTDecimal = tDecimal * (n0 - nk);
-            measurement.setPsiT(AngleValue.fromDecimalDegrees(psiTDecimal));
+            // ψt = t * (n0 - nk)
+            double tDecimalDegrees = measurement.getT().toDecimalDegrees();
+            double n0 = measurement.getN0Value(); // Берем n0 из нуля торсиона
+            double nk = measurement.getNkValue();
+
+            double n0_minus_nk = n0 - nk;
+
+            // Вычисляем ψt в десятичных градусах
+            double psiTDecimalDegrees = tDecimalDegrees * n0_minus_nk;
+
+            // Отладочное сообщение
+            String logMsg = String.format("ψt вычисление: %.4f° * (%.4f - %.4f = %.4f) = %.4f°",
+                    tDecimalDegrees, n0, nk, n0_minus_nk, psiTDecimalDegrees);
+            Log.d(TAG, logMsg);
+
+            if (context != null) {
+                Toast.makeText(context, logMsg, Toast.LENGTH_LONG).show();
+            }
+
+            // Преобразуем результат обратно в AngleValue, с сохранением знака
+            AngleValue psiT = handleNegativeAngle(psiTDecimalDegrees);
+            measurement.setPsiT(psiT);
 
             // ψk = Nk - N0
-            // Nk = (Nk' + Nk'') / 2
-            double nkPrimeDecimal = measurement.getNkPrime().toDecimalDegrees();
-            double nkDoublePrimeDecimal = measurement.getNkDoublePrime().toDecimalDegrees();
+            // Сначала вычислим Nk как среднее между Nk' и Nk''
+            AngleValue nkPrime = measurement.getNkPrime();
+            AngleValue nkDoublePrime = measurement.getNkDoublePrime();
+
+            if (nkPrime == null || nkDoublePrime == null) {
+                Log.e(TAG, "Nk' или Nk'' равны null, невозможно вычислить ψk");
+                if (context != null) {
+                    Toast.makeText(context, "Ошибка: Nk' или Nk'' не заданы", Toast.LENGTH_LONG).show();
+                }
+                return;
+            }
+
+            // Преобразуем в десятичные градусы для математических операций
+            double nkPrimeDecimal = nkPrime.toDecimalDegrees();
+            double nkDoublePrimeDecimal = nkDoublePrime.toDecimalDegrees();
             double nkDecimal = (nkPrimeDecimal + nkDoublePrimeDecimal) / 2.0;
 
-            measurement.setNk(AngleValue.fromDecimalDegrees(nkDecimal));
+            // Сохраняем Nk
+            AngleValue nk_angle = AngleValue.fromDecimalDegrees(nkDecimal);
+            measurement.setNk(nk_angle);
 
-            double n0Decimal = measurement.getN0().toDecimalDegrees();
+            // Получаем N0 из положения равновесия ЧЭ
+            AngleValue n0Angle = measurement.getN0();
+            if (n0Angle == null) {
+                Log.e(TAG, "N0 равен null, невозможно вычислить ψk");
+                if (context != null) {
+                    Toast.makeText(context, "Ошибка: N0 не задан", Toast.LENGTH_LONG).show();
+                }
+                return;
+            }
+
+            double n0Decimal = n0Angle.toDecimalDegrees();
+
+            // Вычисляем ψk в десятичных градусах
             double psiKDecimal = nkDecimal - n0Decimal;
 
-            measurement.setPsiK(AngleValue.fromDecimalDegrees(psiKDecimal));
+            // Отладочное сообщение
+            String logMsg2 = String.format("ψk вычисление: %.4f° - %.4f° = %.4f°",
+                    nkDecimal, n0Decimal, psiKDecimal);
+            Log.d(TAG, logMsg2);
+
+            if (context != null) {
+                Toast.makeText(context, logMsg2, Toast.LENGTH_LONG).show();
+            }
+
+            // Преобразуем результат обратно в AngleValue, с сохранением знака
+            AngleValue psiK = handleNegativeAngle(psiKDecimal);
+            measurement.setPsiK(psiK);
 
             // ε = (ψt + ψk) / D
-            double psiTValue = measurement.getPsiT().toDecimalDegrees();
-            double psiKValue = measurement.getPsiK().toDecimalDegrees();
+            double psiTDecimal = psiT.toDecimalDegrees();
+            double psiKDecimal2 = psiK.toDecimalDegrees();
             double D = measurement.getD();
 
-            double epsilonDecimal = (psiTValue + psiKValue) / D;
-            measurement.setEpsilon(AngleValue.fromDecimalDegrees(epsilonDecimal));
+            double sum = psiTDecimal + psiKDecimal2;
 
-            Log.d(TAG, "Поправка за закручивание торсиона: ψt = " + measurement.getPsiT() +
-                    ", ψk = " + measurement.getPsiK() +
-                    ", ε = " + measurement.getEpsilon());
+            // Вычисляем ε в десятичных градусах
+            double epsilonDecimal = sum / D;
+
+            // Отладочное сообщение
+            String logMsg3 = String.format("ε вычисление: (%.4f° + %.4f° = %.4f°) / %.4f = %.4f°",
+                    psiTDecimal, psiKDecimal2, sum, D, epsilonDecimal);
+            Log.d(TAG, logMsg3);
+
+            if (context != null) {
+                Toast.makeText(context, logMsg3, Toast.LENGTH_LONG).show();
+            }
+
+            // Преобразуем результат обратно в AngleValue, с сохранением знака
+            AngleValue epsilon = handleNegativeAngle(epsilonDecimal);
+            measurement.setEpsilon(epsilon);
+
+            Log.d(TAG, "Результаты поправки за закручивание торсиона: " +
+                    "ψt = " + psiT + ", " +
+                    "ψk = " + psiK + ", " +
+                    "ε = " + epsilon);
         } catch (Exception e) {
             Log.e(TAG, "Ошибка при вычислении поправки за закручивание торсиона: " + e.getMessage(), e);
+            e.printStackTrace();
+            if (measurement instanceof GyroscopicMeasurement &&
+                    ((GyroscopicMeasurement) measurement).getContext() != null) {
+                Toast.makeText(((GyroscopicMeasurement) measurement).getContext(),
+                        "Ошибка: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
         }
+    }
+    /**
+     * Обрабатывает отрицательные углы, сохраняя знак
+     */
+    private AngleValue handleNegativeAngle(double decimalDegrees) {
+        boolean isNegative = decimalDegrees < 0;
+        double absDegrees = Math.abs(decimalDegrees);
+
+        int degrees = (int) absDegrees;
+        double minutesDecimal = (absDegrees - degrees) * 60.0;
+        int minutes = (int) minutesDecimal;
+        double seconds = (minutesDecimal - minutes) * 60.0;
+
+        // Округляем секунды до одного знака после запятой
+        seconds = Math.round(seconds * 10) / 10.0;
+
+        // Если секунды округлились до 60
+        if (seconds >= 60.0) {
+            seconds = 0;
+            minutes++;
+        }
+
+        // Если минуты стали 60
+        if (minutes >= 60) {
+            minutes = 0;
+            degrees++;
+        }
+
+        // Применяем знак только к градусам для сохранения правильного представления
+        if (isNegative) {
+            degrees = -degrees;
+        }
+
+        return new AngleValue(degrees, minutes, seconds);
     }
 
     /**
