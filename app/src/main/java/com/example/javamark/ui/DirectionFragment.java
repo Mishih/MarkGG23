@@ -19,7 +19,7 @@ import com.example.javamark.calculator.GyroscopicCalculator;
 import com.example.javamark.model.AngleValue;
 import com.example.javamark.model.GyroscopicMeasurement;
 import com.google.android.material.textfield.TextInputEditText;
-
+import android.widget.Toast;
 /**
  * Фрагмент для ввода данных и вычисления примычного направления
  */
@@ -210,14 +210,45 @@ public class DirectionFragment extends Fragment {
     private void updateResults() {
         if (measurement.getNPrime() != null && measurement.getNPrime().getDegrees() != 0) {
             tvNPrime.setText(measurement.getNPrime().toString());
+        } else {
+            tvNPrime.setText("-");
         }
 
         if (measurement.getNDoublePrime() != null && measurement.getNDoublePrime().getDegrees() != 0) {
             tvNDoublePrime.setText(measurement.getNDoublePrime().toString());
+        } else {
+            tvNDoublePrime.setText("-");
         }
 
         if (measurement.getN() != null && measurement.getN().getDegrees() != 0) {
-            tvN.setText(measurement.getN().toString() + " (среднее N' и N'')");
+            tvN.setText(measurement.getN().toString() + " (среднее между N' и N'')");
+        } else {
+            tvN.setText("-");
+        }
+
+        // Проверка допуска |N' - N''| <= 30"
+        if (measurement.getNPrime() != null && measurement.getNDoublePrime() != null) {
+            double nPrimeDecimal = measurement.getNPrime().toDecimalDegrees();
+            double nDoublePrimeDecimal = measurement.getNDoublePrime().toDecimalDegrees();
+
+            // Вычисляем разницу в секундах
+            double differenceInDegrees = Math.abs(nPrimeDecimal - nDoublePrimeDecimal);
+            double differenceInSeconds = differenceInDegrees * 3600;
+
+            if (differenceInSeconds > 30.0) {
+                // Выделяем красным, если не в допуске
+                tvNPrime.setTextColor(getResources().getColor(R.color.red, null));
+                tvNDoublePrime.setTextColor(getResources().getColor(R.color.red, null));
+
+                // Форматируем сообщение с дробной частью до одного знака
+                Toast.makeText(getContext(),
+                        "Внимание! |N' - N''| = " + String.format("%.1f", differenceInSeconds) + "\" > 30\"",
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                // Нормальный цвет, если в допуске
+                tvNPrime.setTextColor(getResources().getColor(android.R.color.black, null));
+                tvNDoublePrime.setTextColor(getResources().getColor(android.R.color.black, null));
+            }
         }
     }
 }

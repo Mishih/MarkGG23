@@ -59,15 +59,24 @@ public class AngleValue implements Serializable {
         }
     }
 
-    // Преобразование в десятичные градусы
+    /**
+     * Преобразование в десятичные градусы с учетом знака
+     */
     public double toDecimalDegrees() {
-        return degrees + (minutes / 60.0) + (seconds / 3600.0);
+        // Учитываем знак градусов
+        int sign = (degrees < 0) ? -1 : 1;
+        return degrees + sign * (minutes / 60.0) + sign * (seconds / 3600.0);
     }
 
-    // Создание из десятичных градусов
+    /**
+     * Создание из десятичных градусов
+     */
     public static AngleValue fromDecimalDegrees(double decimalDegrees) {
         try {
+            // Сохраняем знак
+            boolean isNegative = decimalDegrees < 0;
             double absDecimalDegrees = Math.abs(decimalDegrees);
+
             int degrees = (int) absDecimalDegrees;
             double minutesDecimal = (absDecimalDegrees - degrees) * 60.0;
             int minutes = (int) minutesDecimal;
@@ -88,7 +97,10 @@ public class AngleValue implements Serializable {
                 degrees += 1;
             }
 
-            Log.d(TAG, "Преобразование из " + decimalDegrees + " в " + degrees + "° " + minutes + "′ " + seconds + "″");
+            // Применяем знак к градусам
+            if (isNegative) {
+                degrees = -degrees;
+            }
 
             return new AngleValue(degrees, minutes, seconds);
         } catch (Exception e) {
@@ -97,10 +109,18 @@ public class AngleValue implements Serializable {
         }
     }
 
+    /**
+     * Преобразование в строку с учетом знака
+     */
     @Override
     public String toString() {
-        // Используем US локаль для использования точки как десятичного разделителя
-        return String.format(Locale.US, "%d°%d′%.1f″", degrees, minutes, seconds);
+        // Проверяем, отрицательный ли угол
+        boolean isNegative = degrees < 0;
+        int absDegrees = Math.abs(degrees);
+
+        // Используем US локаль для точки как десятичного разделителя
+        String sign = isNegative ? "-" : "";
+        return String.format(Locale.US, "%s%d°%d′%.1f″", sign, absDegrees, minutes, seconds);
     }
 
     // Парсинг строкового представления угла

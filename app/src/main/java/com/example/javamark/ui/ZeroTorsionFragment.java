@@ -20,7 +20,7 @@ import com.example.javamark.model.GyroscopicMeasurement;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.text.DecimalFormat;
-
+import android.widget.Toast;
 /**
  * Фрагмент для ввода данных и вычисления нуля торсиона
  */
@@ -225,6 +225,52 @@ public class ZeroTorsionFragment extends Fragment {
 
         if (measurement.getN0Value() != 0) {
             tvN0.setText(df.format(measurement.getN0Value()));
+        }
+
+        // Проверка допуска |n0' - n0''| <= 1
+        if (measurement.getN0PrimeValue() != 0 && measurement.getN0DoublePrimeValue() != 0) {
+            double difference = Math.abs(measurement.getN0PrimeValue() - measurement.getN0DoublePrimeValue());
+            if (difference > 1.0) {
+                // Выделяем красным, если не в допуске
+                tvN0Prime.setTextColor(getResources().getColor(R.color.red, null));
+                tvN0DoublePrime.setTextColor(getResources().getColor(R.color.red, null));
+                Toast.makeText(getContext(), "Внимание! |n0' - n0''| = " + df.format(difference) + " > 1", Toast.LENGTH_SHORT).show();
+            } else {
+                // Нормальный цвет, если в допуске
+                tvN0Prime.setTextColor(getResources().getColor(android.R.color.black, null));
+                tvN0DoublePrime.setTextColor(getResources().getColor(android.R.color.black, null));
+            }
+        }
+
+        // Проверка допуска |ni - n0| <= 40 для всех i
+        double n0Value = measurement.getN0Value();
+        if (n0Value != 0) {
+            boolean outOfRange = false;
+            StringBuilder message = new StringBuilder("Вне допуска: ");
+
+            if (Math.abs(measurement.getN1Value() - n0Value) > 40) {
+                outOfRange = true;
+                message.append("|n1-n0| ");
+            }
+            if (Math.abs(measurement.getN2Value() - n0Value) > 40) {
+                outOfRange = true;
+                message.append("|n2-n0| ");
+            }
+            if (Math.abs(measurement.getN3Value() - n0Value) > 40) {
+                outOfRange = true;
+                message.append("|n3-n0| ");
+            }
+            if (Math.abs(measurement.getN4Value() - n0Value) > 40) {
+                outOfRange = true;
+                message.append("|n4-n0| ");
+            }
+
+            if (outOfRange) {
+                tvN0.setTextColor(getResources().getColor(R.color.red, null));
+                Toast.makeText(getContext(), message.toString() + "> 40", Toast.LENGTH_SHORT).show();
+            } else {
+                tvN0.setTextColor(getResources().getColor(android.R.color.black, null));
+            }
         }
     }
 }

@@ -19,7 +19,7 @@ import com.example.javamark.calculator.GyroscopicCalculator;
 import com.example.javamark.model.AngleValue;
 import com.example.javamark.model.GyroscopicMeasurement;
 import com.google.android.material.textfield.TextInputEditText;
-
+import android.widget.Toast;
 /**
  * Фрагмент для ввода данных и вычисления положения равновесия ЧЭ
  */
@@ -218,6 +218,31 @@ public class EquilibriumFragment extends Fragment {
 
         if (measurement.getN0() != null && measurement.getN0().getDegrees() != 0) {
             tvN0.setText(measurement.getN0().toString());
+        }
+
+        // Проверка допуска |N0' - N0''| <= 30"
+        if (measurement.getN0Prime() != null && measurement.getN0DoublePrime() != null) {
+            double n0PrimeDecimal = measurement.getN0Prime().toDecimalDegrees();
+            double n0DoublePrimeDecimal = measurement.getN0DoublePrime().toDecimalDegrees();
+
+            // Вычисляем разницу в секундах
+            double differenceInDegrees = Math.abs(n0PrimeDecimal - n0DoublePrimeDecimal);
+            double differenceInSeconds = differenceInDegrees * 3600;
+
+            if (differenceInSeconds > 30.0) {
+                // Выделяем красным, если не в допуске
+                tvN0Prime.setTextColor(getResources().getColor(R.color.red, null));
+                tvN0DoublePrime.setTextColor(getResources().getColor(R.color.red, null));
+
+                // Форматируем сообщение с дробной частью до одного знака
+                Toast.makeText(getContext(),
+                        "Внимание! |N0' - N0''| = " + String.format("%.1f", differenceInSeconds) + "\" > 30\"",
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                // Нормальный цвет, если в допуске
+                tvN0Prime.setTextColor(getResources().getColor(android.R.color.black, null));
+                tvN0DoublePrime.setTextColor(getResources().getColor(android.R.color.black, null));
+            }
         }
     }
 }

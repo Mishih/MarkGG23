@@ -4,7 +4,8 @@ import android.util.Log;
 
 import com.example.javamark.model.AngleValue;
 import com.example.javamark.model.GyroscopicMeasurement;
-
+import android.content.Context;
+import android.widget.Toast;
 /**
  * Класс для выполнения расчётов гироскопического ориентирования
  */
@@ -248,35 +249,7 @@ public class GyroscopicCalculator {
      * Обрабатывает отрицательные углы, сохраняя знак
      */
     private AngleValue handleNegativeAngle(double decimalDegrees) {
-        boolean isNegative = decimalDegrees < 0;
-        double absDegrees = Math.abs(decimalDegrees);
-
-        int degrees = (int) absDegrees;
-        double minutesDecimal = (absDegrees - degrees) * 60.0;
-        int minutes = (int) minutesDecimal;
-        double seconds = (minutesDecimal - minutes) * 60.0;
-
-        // Округляем секунды до одного знака после запятой
-        seconds = Math.round(seconds * 10) / 10.0;
-
-        // Если секунды округлились до 60
-        if (seconds >= 60.0) {
-            seconds = 0;
-            minutes++;
-        }
-
-        // Если минуты стали 60
-        if (minutes >= 60) {
-            minutes = 0;
-            degrees++;
-        }
-
-        // Применяем знак только к градусам для сохранения правильного представления
-        if (isNegative) {
-            degrees = -degrees;
-        }
-
-        return new AngleValue(degrees, minutes, seconds);
+        return AngleValue.fromDecimalDegrees(decimalDegrees);
     }
 
     /**
