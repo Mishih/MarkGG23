@@ -20,12 +20,12 @@ import com.example.javamark.calculator.GyroscopicCalculator;
 import com.example.javamark.model.AngleValue;
 import com.example.javamark.model.GyroscopicMeasurement;
 import com.google.android.material.textfield.TextInputEditText;
-
+import android.util.Log;
 /**
  * Фрагмент для ввода данных и вычисления поправки за закручивание торсиона
  */
 public class TorsionCorrectionFragment extends Fragment {
-
+    private static final String TAG = "TorsionCorrection";  // Добавляем константу TAG для логирования
     private GyroscopicMeasurement measurement;
     private TextInputEditText etNk, etT, etNkPrime, etNkDoublePrime, etD;
     private TextView tvPsiT, tvPsiK, tvEpsilon;
@@ -242,56 +242,173 @@ public class TorsionCorrectionFragment extends Fragment {
     /**
      * Выполняет вычисление поправки за закручивание торсиона
      */
+    /**
+     * Выполняет вычисление поправки за закручивание торсиона - совершенно новый подход
+     */
     private void calculate() {
-        // Выполняем штатный расчет
-        calculator.calculateTorsionCorrection();
+        try {
+            // Ручной расчет ψt = t × (n₀ - nₖ)
+            double t_value = 0.0;
+            if (measurement.getT() != null) {
+                t_value = measurement.getT().toDecimalDegrees();
+            } else {
+                Toast.makeText(getContext(), "Ошибка: не задан температурный коэффициент t", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-        // Проверяем, установлено ли значение psiT
-        if (measurement.getPsiT() == null) {
-            // Проверяем наличие всех необходимых данных
-            if (measurement.getT() != null && measurement.getN0Value() != 0) {
-                // Если значение не установлено, делаем ручной расчет
-                double tDecimal = measurement.getT().toDecimalDegrees();
-                double difference = measurement.getN0Value() - measurement.getNkValue();
-                double psiTDecimal = tDecimal * difference;
+            double n0_value = measurement.getN0Value(); // Берем n0 из нуля торсиона
+            double nk_value = measurement.getNkValue();  // Значение nk
 
-                // Преобразуем в AngleValue и устанавливаем в модель
-                AngleValue psiT = AngleValue.fromDecimalDegrees(psiTDecimal);
-                measurement.setPsiT(psiT);
+            // Разность (n₀ - nₖ)
+            double difference = n0_value - nk_value;
 
-                // Отображаем значение в отладочных целях
-                Toast.makeText(getContext(),
-                        "psiT = " + psiTDecimal + "° -> " + psiT.toString(),
-                        Toast.LENGTH_SHORT).show();
+            // Вычисляем ψt в десятичных градусах
+            double psiT_decimal = t_value * difference;
 
-                // Теперь пробуем вычислить ψk и ε
-                if (measurement.getNk() != null && measurement.getN0() != null) {
-                    // ψk = Nk - N0
-                    double nkDecimal = measurement.getNk().toDecimalDegrees();
+            // Обязательно выводим детальное сообщение для отладки
+            Toast.makeText(getContext(),
+                    String.format("Расчет ψt: %.6f° × (%.2f - %.2f = %.2f) = %.6f°",
+                            t_value, n0_value, nk_value, difference, psiT_decimal),
+                    Toast.LENGTH_LONG).show();
+
+            // Преобразуем в градусы, минуты, секунды с учетом знака
+            boolean isNegative = psiT_decimal < 0;
+            double absPsiT = Math.abs(psiT_decimal);
+
+            int degrees = (int)absPsiT;
+            double minutesDecimal = (absPsiT - degrees) * 60.0;
+            int minutes = (int)minutesDecimal;
+            double seconds = (minutesDecimal - minutes) * 60.0;
+
+            // Создаем новый объект AngleValue и сохраняем его
+            AngleValue psiT;
+            if (isNegative) {
+                if (degrees > 0) {
+                    psiT = new AngleValue(-degrees, minutes, seconds);
+                } else {
+                    // Особый случай - градусы равны нулю, минусуем минуты
+                    psiT = new AngleValue(0, -minutes, seconds);
+                }
+            } else {
+                psiT = new AngleValue(degrees, minutes, seconds);
+            }
+
+            // Принудительно устанавливаем правильное отображение, игнорируя AngleValue.toString()
+            String psiTString = isNegative ?
+                    String.format("-0°%d′%.1f″", minutes, seconds) :
+                    String.format("0°%d′%.1f″", minutes, seconds);
+
+            if (degrees > 0) {
+                psiTString = isNegative ?
+                        String.format("-%d°%d′%.1f″", degrees, minutes, seconds) :
+                        String.format("%d°%d′%.1f″", degrees, minutes, seconds);
+            }
+            measurement.setPsiTDirectValue(psiT_decimal);
+
+
+            // Сохраняем в модель, но отображаем принудительное значение
+            measurement.setPsiT(psiT);
+            tvPsiT.setText(psiTString);
+
+            // Расчет для Nk (среднее между Nk' и Nk'')
+            if (measurement.getNkPrime() != null && measurement.getNkDoublePrime() != null) {
+                double nkPrimeDecimal = measurement.getNkPrime().toDecimalDegrees();
+                double nkDoublePrimeDecimal = measurement.getNkDoublePrime().toDecimalDegrees();
+                double nkDecimal = (nkPrimeDecimal + nkDoublePrimeDecimal) / 2.0;
+
+                AngleValue nk = AngleValue.fromDecimalDegrees(nkDecimal);
+                measurement.setNk(nk);
+
+                // Расчет ψk = Nk - N0 (напрямую в десятичных градусах)
+                if (measurement.getN0() != null) {
                     double n0Decimal = measurement.getN0().toDecimalDegrees();
                     double psiKDecimal = nkDecimal - n0Decimal;
 
+                    // Преобразуем в AngleValue и сохраняем
                     AngleValue psiK = AngleValue.fromDecimalDegrees(psiKDecimal);
                     measurement.setPsiK(psiK);
+                    tvPsiK.setText(psiK.toString());
 
-                    // ε = (ψt + ψk) / D
-                    double sumDecimal = psiTDecimal + psiKDecimal;
-                    double epsilonDecimal = sumDecimal / measurement.getD();
+                    // Расчет ε = (ψt + ψk)/D в десятичных градусах
+                    double D = measurement.getD();
 
+                    // Прямое суммирование десятичных значений
+                    double sum = psiT_decimal + psiKDecimal;
+                    double epsilonDecimal = sum / D;
+
+                    // Для отладки показываем полный расчет
+                    Toast.makeText(getContext(),
+                            String.format("Сумма: %.6f° + %.6f° = %.6f°\nε = %.6f° / %.1f = %.6f°",
+                                    psiT_decimal, psiKDecimal, sum, sum, D, epsilonDecimal),
+                            Toast.LENGTH_LONG).show();
+
+                    // Преобразуем в AngleValue и сохраняем
                     AngleValue epsilon = AngleValue.fromDecimalDegrees(epsilonDecimal);
                     measurement.setEpsilon(epsilon);
+                    tvEpsilon.setText(epsilon.toString());
                 }
             } else {
-                Toast.makeText(getContext(),
-                        "Недостаточно данных для расчета. Убедитесь, что вы выполнили шаг 'Нуль торсиона'",
-                        Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "Введите значения Nk' и Nk'' для расчета ψk и ε", Toast.LENGTH_SHORT).show();
+            }
+
+            // Проверка допусков
+            checkTolerances();
+
+        } catch (Exception e) {
+            Toast.makeText(getContext(), "Ошибка при расчете: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Log.e(TAG, "Ошибка расчета: " + e.getMessage(), e);
+        }
+    }
+    /**
+     * Проверяет допуски для значений
+     */
+    private void checkTolerances() {
+        // Проверка допуска |Nk' - Nk''| <= 6"
+        if (measurement.getNkPrime() != null && measurement.getNkDoublePrime() != null) {
+            double nkPrimeDecimal = measurement.getNkPrime().toDecimalDegrees();
+            double nkDoublePrimeDecimal = measurement.getNkDoublePrime().toDecimalDegrees();
+            double differenceInDegrees = Math.abs(nkPrimeDecimal - nkDoublePrimeDecimal);
+            double differenceInSeconds = differenceInDegrees * 3600;
+
+            if (differenceInSeconds > 6.0) {
+                // Ищем текстовые поля для Nk' и Nk''
+                TextInputEditText etNkPrime = getView().findViewById(R.id.et_Nk_prime);
+                TextInputEditText etNkDoublePrime = getView().findViewById(R.id.et_Nk_double_prime);
+
+                if (etNkPrime != null && etNkDoublePrime != null) {
+                    etNkPrime.setTextColor(getResources().getColor(R.color.red, null));
+                    etNkDoublePrime.setTextColor(getResources().getColor(R.color.red, null));
+
+                    // Форматируем сообщение с дробной частью до одного знака
+                    Toast.makeText(getContext(),
+                            "Внимание! |Nk' - Nk''| = " + String.format("%.1f", differenceInSeconds) + "\" > 6\"",
+                            Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                // Нормальный цвет, если в допуске
+                TextInputEditText etNkPrime = getView().findViewById(R.id.et_Nk_prime);
+                TextInputEditText etNkDoublePrime = getView().findViewById(R.id.et_Nk_double_prime);
+
+                if (etNkPrime != null && etNkDoublePrime != null) {
+                    etNkPrime.setTextColor(getResources().getColor(android.R.color.black, null));
+                    etNkDoublePrime.setTextColor(getResources().getColor(android.R.color.black, null));
+                }
             }
         }
 
-        // Обновляем отображение результатов
-        updateResults();
+        // Проверка допуска |ψk| <= 1°
+        if (measurement.getPsiK() != null) {
+            double psiKDegrees = Math.abs(measurement.getPsiK().toDecimalDegrees());
+            if (psiKDegrees > 1.0) {
+                tvPsiK.setTextColor(getResources().getColor(R.color.red, null));
+                Toast.makeText(getContext(),
+                        "Внимание! |ψk| = " + String.format("%.4f", psiKDegrees) + "° > 1°",
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                tvPsiK.setTextColor(getResources().getColor(android.R.color.black, null));
+            }
+        }
     }
-
     /**
      * Обновляет отображение результатов
      */

@@ -20,6 +20,7 @@ import com.example.javamark.model.AngleValue;
 import com.example.javamark.model.GyroscopicMeasurement;
 import com.google.android.material.textfield.TextInputEditText;
 import android.widget.Toast;
+import android.util.Log;
 /**
  * Фрагмент для ввода данных и вычисления примычного направления
  */
@@ -199,35 +200,77 @@ public class DirectionFragment extends Fragment {
     /**
      * Выполняет вычисление примычного направления
      */
+    /**
+     * Выполняет вычисление примычного направления
+     */
     private void calculate() {
-        calculator.calculateDirection();
-        updateResults();
+        try {
+            // N' - для первой пары отсчетов (КЛ1 и КП1)
+            AngleValue kl1 = measurement.getKL1();
+            AngleValue kp1 = measurement.getKP1();
 
-        // Проверка допуска |N' - N''| <= 30"
-        if (measurement.getNPrime() != null && measurement.getNDoublePrime() != null) {
-            double nPrimeDecimal = measurement.getNPrime().toDecimalDegrees();
-            double nDoublePrimeDecimal = measurement.getNDoublePrime().toDecimalDegrees();
+            if (kl1 != null && kp1 != null) {
+                // Берем градусы из КЛ
+                int nPrimeDegrees = kl1.getDegrees();
 
-            // Вычисляем разницу в секундах
-            double differenceInDegrees = Math.abs(nPrimeDecimal - nDoublePrimeDecimal);
-            double differenceInSeconds = differenceInDegrees * 3600;
+                // Складываем минуты и секунды КЛ с минутами и секундами КП, делим пополам
+                double kl1Minutes = kl1.getMinutes() + (kl1.getSeconds() / 60.0);
+                double kp1Minutes = kp1.getMinutes() + (kp1.getSeconds() / 60.0);
 
-            if (differenceInSeconds > 30.0) {
-                // Выделяем красным, если не в допуске
-                tvNPrime.setTextColor(getResources().getColor(R.color.red, null));
-                tvNDoublePrime.setTextColor(getResources().getColor(R.color.red, null));
+                double avgMinutes = (kl1Minutes + kp1Minutes) / 2.0;
+                int minutes = (int)avgMinutes;
+                double seconds = (avgMinutes - minutes) * 60.0;
 
-                // Форматируем сообщение с дробной частью до одного знака
+                // Создаем AngleValue с градусами из КЛ и средними минутами/секундами
+                AngleValue nPrime = new AngleValue(nPrimeDegrees, minutes, seconds);
+                measurement.setNPrime(nPrime);
+
+                // Отладочный вывод
                 Toast.makeText(getContext(),
-                        "Внимание! |N' - N''| = " + String.format("%.1f", differenceInSeconds) + "\" > 30\" (вне допуска)",
+                        String.format("N': Градусы из КЛ=%d, средние мин.=%d, сек.=%.1f",
+                                nPrimeDegrees, minutes, seconds),
                         Toast.LENGTH_LONG).show();
-
-                // НЕ добавляем return здесь, позволяем продолжить расчеты
-            } else {
-                // Нормальный цвет, если в допуске
-                tvNPrime.setTextColor(getResources().getColor(android.R.color.black, null));
-                tvNDoublePrime.setTextColor(getResources().getColor(android.R.color.black, null));
             }
+
+            // N'' - аналогично для второй пары
+            AngleValue kl2 = measurement.getKL2();
+            AngleValue kp2 = measurement.getKP2();
+
+            if (kl2 != null && kp2 != null) {
+                // Берем градусы из КЛ
+                int nDoublePrimeDegrees = kl2.getDegrees();
+
+                // Складываем минуты и секунды КЛ с минутами и секундами КП, делим пополам
+                double kl2Minutes = kl2.getMinutes() + (kl2.getSeconds() / 60.0);
+                double kp2Minutes = kp2.getMinutes() + (kp2.getSeconds() / 60.0);
+
+                double avgMinutes = (kl2Minutes + kp2Minutes) / 2.0;
+                int minutes = (int)avgMinutes;
+                double seconds = (avgMinutes - minutes) * 60.0;
+
+                // Создаем AngleValue с градусами из КЛ и средними минутами/секундами
+                AngleValue nDoublePrime = new AngleValue(nDoublePrimeDegrees, minutes, seconds);
+                measurement.setNDoublePrime(nDoublePrime);
+            }
+
+            // N = (N' + N'') / 2 - всегда рассчитываем, даже если разница больше допустимой
+            if (measurement.getNPrime() != null && measurement.getNDoublePrime() != null) {
+                double nPrimeDecimal = measurement.getNPrime().toDecimalDegrees();
+                double nDoublePrimeDecimal = measurement.getNDoublePrime().toDecimalDegrees();
+                double nDecimal = (nPrimeDecimal + nDoublePrimeDecimal) / 2.0;
+
+                AngleValue n = AngleValue.fromDecimalDegrees(nDecimal);
+                measurement.setN(n);
+
+                // Показываем результат N
+                tvN.setText(n.toString() + " (среднее между N' и N'')");
+            }
+
+            updateResults();
+
+        } catch (Exception e) {
+            Toast.makeText(getContext(), "Ошибка при расчете: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Log.e("DirectionFragment", "Ошибка при вычислении примычного направления: " + e.getMessage(), e);
         }
     }
 
@@ -248,7 +291,7 @@ public class DirectionFragment extends Fragment {
         }
 
         if (measurement.getN() != null && measurement.getN().getDegrees() != 0) {
-            tvN.setText(measurement.getN().toString() + " (среднее между N' и N'')");
+            tvN.setText(measurement.getN().toString());
         } else {
             tvN.setText("-");
         }
@@ -269,8 +312,8 @@ public class DirectionFragment extends Fragment {
 
                 // Форматируем сообщение с дробной частью до одного знака
                 Toast.makeText(getContext(),
-                        "Внимание! |N' - N''| = " + String.format("%.1f", differenceInSeconds) + "\" > 30\"",
-                        Toast.LENGTH_SHORT).show();
+                        "Внимание! |N' - N''| = " + String.format("%.1f", differenceInSeconds) + "\" > 30\" (вне допуска)",
+                        Toast.LENGTH_LONG).show();
             } else {
                 // Нормальный цвет, если в допуске
                 tvNPrime.setTextColor(getResources().getColor(android.R.color.black, null));

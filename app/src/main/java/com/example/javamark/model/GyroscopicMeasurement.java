@@ -359,7 +359,15 @@ public class GyroscopicMeasurement implements Serializable {
     public void setGyroscopicAzimuth(AngleValue gyroscopicAzimuth) {
         this.gyroscopicAzimuth = gyroscopicAzimuth;
     }
+    private double psiTDirectValue; // Прямое значение ψt = t * (n₀ - nₖ)
 
+    public double getPsiTDirectValue() {
+        return psiTDirectValue;
+    }
+
+    public void setPsiTDirectValue(double psiTDirectValue) {
+        this.psiTDirectValue = psiTDirectValue;
+    }
     // Форматированная дата
     public String getFormattedDate() {
         java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd.MM.yyyy HH:mm");

@@ -71,6 +71,9 @@ public class AngleValue implements Serializable {
     /**
      * Создание из десятичных градусов
      */
+    /**
+     * Создание из десятичных градусов
+     */
     public static AngleValue fromDecimalDegrees(double decimalDegrees) {
         try {
             // Сохраняем знак
@@ -97,12 +100,24 @@ public class AngleValue implements Serializable {
                 degrees += 1;
             }
 
-            // Применяем знак к градусам
-            if (isNegative) {
+            // Применяем знак к градусам, если они не равны нулю
+            if (isNegative && degrees > 0) {
                 degrees = -degrees;
+            } else if (isNegative && degrees == 0) {
+                // Если градусы нулевые, но угол отрицательный, ставим знак минус для минут
+                if (minutes > 0) {
+                    minutes = -minutes;
+                } else if (minutes == 0 && seconds > 0) {
+                    // Если и градусы и минуты нулевые, ставим знак минус на секунды
+                    seconds = -seconds;
+                }
             }
 
-            return new AngleValue(degrees, minutes, seconds);
+            // Отладочный вывод
+            Log.d(TAG, String.format("fromDecimalDegrees: Вход=%.6f°, Выход=%d°%d′%.1f″",
+                    decimalDegrees, degrees, Math.abs(minutes), Math.abs(seconds)));
+
+            return new AngleValue(degrees, Math.abs(minutes), Math.abs(seconds));
         } catch (Exception e) {
             Log.e(TAG, "Ошибка при преобразовании десятичных градусов: " + e.getMessage());
             return new AngleValue(0, 0, 0);
@@ -115,22 +130,16 @@ public class AngleValue implements Serializable {
     @Override
     public String toString() {
         // Проверяем, отрицательный ли угол
-        boolean isNegative = degrees < 0;
+        boolean isNegative = degrees < 0 || (degrees == 0 && minutes < 0) || (degrees == 0 && minutes == 0 && seconds < 0);
         int absDegrees = Math.abs(degrees);
+        int absMinutes = Math.abs(minutes);
+        double absSeconds = Math.abs(seconds);
 
-        // Если градусов ноль, но угол отрицательный, нужно показать минус
-        String sign = "";
-        if (isNegative) {
-            sign = "-";
-        } else if (degrees == 0 && (minutes < 0 || seconds < 0)) {
-            sign = "-";
-            // Обеспечиваем, что минуты и секунды положительные при отображении
-            minutes = Math.abs(minutes);
-            seconds = Math.abs(seconds);
-        }
+        // Формируем знак
+        String sign = isNegative ? "-" : "";
 
         // Используем US локаль для точки как десятичного разделителя
-        return String.format(Locale.US, "%s%d°%d′%.1f″", sign, absDegrees, minutes, seconds);
+        return String.format(Locale.US, "%s%d°%d′%.1f″", sign, absDegrees, absMinutes, absSeconds);
     }
 
     // Парсинг строкового представления угла
