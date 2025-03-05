@@ -100,9 +100,6 @@ public class TorsionCorrectionFragment extends Fragment {
             etD.setText("1.0");
         }
 
-        // Обновление результатов, если они уже есть
-        updateResults();
-
         // Настройка слушателей для полей ввода
         setupInputListeners();
 
@@ -116,6 +113,13 @@ public class TorsionCorrectionFragment extends Fragment {
         });
 
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // Обновление результатов, если они уже есть - ПЕРЕНЕСЕНО СЮДА
+        updateResults();
     }
 
     /**
@@ -292,6 +296,16 @@ public class TorsionCorrectionFragment extends Fragment {
      * Обновляет отображение результатов
      */
     private void updateResults() {
+        // Проверка на null view
+        if (getView() == null) {
+            return;
+        }
+
+        // Проверка на null элементов
+        if (tvPsiT == null || tvPsiK == null || tvEpsilon == null) {
+            return;
+        }
+
         if (measurement.getPsiT() != null) {
             tvPsiT.setText(measurement.getPsiT().toString());
             tvPsiT.setTextColor(getResources().getColor(android.R.color.black, null));
@@ -334,7 +348,7 @@ public class TorsionCorrectionFragment extends Fragment {
             double differenceInSeconds = differenceInDegrees * 3600;
 
             if (differenceInSeconds > 6.0) {
-                // Ищем текстовые поля для Nk' и Nk'' и выделяем их красным
+                // Ищем текстовые поля для Nk' и Nk''
                 TextInputEditText etNkPrime = getView().findViewById(R.id.et_Nk_prime);
                 TextInputEditText etNkDoublePrime = getView().findViewById(R.id.et_Nk_double_prime);
 

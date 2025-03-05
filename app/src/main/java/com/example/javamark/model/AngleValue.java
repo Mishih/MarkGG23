@@ -118,8 +118,18 @@ public class AngleValue implements Serializable {
         boolean isNegative = degrees < 0;
         int absDegrees = Math.abs(degrees);
 
+        // Если градусов ноль, но угол отрицательный, нужно показать минус
+        String sign = "";
+        if (isNegative) {
+            sign = "-";
+        } else if (degrees == 0 && (minutes < 0 || seconds < 0)) {
+            sign = "-";
+            // Обеспечиваем, что минуты и секунды положительные при отображении
+            minutes = Math.abs(minutes);
+            seconds = Math.abs(seconds);
+        }
+
         // Используем US локаль для точки как десятичного разделителя
-        String sign = isNegative ? "-" : "";
         return String.format(Locale.US, "%s%d°%d′%.1f″", sign, absDegrees, minutes, seconds);
     }
 

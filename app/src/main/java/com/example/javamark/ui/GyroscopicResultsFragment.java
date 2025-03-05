@@ -299,12 +299,7 @@ public class GyroscopicResultsFragment extends Fragment {
             allInfo.append("Г = ").append(measurement.getGyroscopicAzimuth().toString()).append("\n");
         }
 
-        // Отображаем диалог с полной информацией
-        new AlertDialog.Builder(getContext())
-                .setTitle("Полные расчеты")
-                .setMessage(allInfo.toString())
-                .setPositiveButton("OK", null)
-                .show();
+
         // Добавляем раздел с проверкой допусков
         allInfo.append("=== 6. ПРОВЕРКА ДОПУСКОВ ===\n\n");
 

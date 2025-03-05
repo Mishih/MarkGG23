@@ -202,6 +202,33 @@ public class DirectionFragment extends Fragment {
     private void calculate() {
         calculator.calculateDirection();
         updateResults();
+
+        // Проверка допуска |N' - N''| <= 30"
+        if (measurement.getNPrime() != null && measurement.getNDoublePrime() != null) {
+            double nPrimeDecimal = measurement.getNPrime().toDecimalDegrees();
+            double nDoublePrimeDecimal = measurement.getNDoublePrime().toDecimalDegrees();
+
+            // Вычисляем разницу в секундах
+            double differenceInDegrees = Math.abs(nPrimeDecimal - nDoublePrimeDecimal);
+            double differenceInSeconds = differenceInDegrees * 3600;
+
+            if (differenceInSeconds > 30.0) {
+                // Выделяем красным, если не в допуске
+                tvNPrime.setTextColor(getResources().getColor(R.color.red, null));
+                tvNDoublePrime.setTextColor(getResources().getColor(R.color.red, null));
+
+                // Форматируем сообщение с дробной частью до одного знака
+                Toast.makeText(getContext(),
+                        "Внимание! |N' - N''| = " + String.format("%.1f", differenceInSeconds) + "\" > 30\" (вне допуска)",
+                        Toast.LENGTH_LONG).show();
+
+                // НЕ добавляем return здесь, позволяем продолжить расчеты
+            } else {
+                // Нормальный цвет, если в допуске
+                tvNPrime.setTextColor(getResources().getColor(android.R.color.black, null));
+                tvNDoublePrime.setTextColor(getResources().getColor(android.R.color.black, null));
+            }
+        }
     }
 
     /**
